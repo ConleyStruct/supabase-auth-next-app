@@ -51,6 +51,24 @@ export default function Login({
     return redirect("/login?message=Check email to continue sign in process");
   };
 
+  const signInWithNotion = async () => {
+    const origin = headers().get("origin");
+    const supabase = createClient();
+
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: "notion",
+      options: {
+        redirectTo: `${origin}/auth/callback`,
+      },
+    });
+
+    if (error) {
+      return redirect("/login?message=Could not authenticate user");
+    }
+
+    return redirect("/protected");
+  }
+
   return (
     <div className="flex-1 flex flex-col w-full px-8 sm:max-w-md justify-center gap-2">
       <Link
@@ -100,6 +118,13 @@ export default function Login({
           pendingText="Signing In..."
         >
           Sign In
+        </SubmitButton>
+        <SubmitButton
+          formAction={signInWithNotion}
+          className="bg-green-700 rounded-md px-4 py-2 text-foreground mb-2"
+          pendingText="Redirecting..."
+        >
+          Sign In with Notion
         </SubmitButton>
         <SubmitButton
           formAction={signUp}
